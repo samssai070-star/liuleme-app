@@ -1,127 +1,126 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+Python 3.14.2 (v3.14.2:df793163d58, Dec  5 2025, 12:18:06) [Clang 16.0.0 (clang-1600.0.26.6)] on darwin
+Enter "help" below or click "Help" above for more information.
+import streamlit as st
+import streamlit.components.v1 as components
+import json
+
+# --- 1. Python 精算逻辑 (核心算法) ---
+def get_expert_analysis(data):
+    try:
+        # 确保数据存在且能转为整数
+        score_val = data.get('score', 0)
+        score = int(score_val) if score_val else 0
+    except (ValueError, TypeError):
+        score = 0
+        
+    province = data.get('province', '全国')
+    budget = data.get('budget', '10-15万')
+    
+    # 成功率模型
+    base_rate = 65 + (score / 10)
+    if budget == "25万以上": base_rate += 10
+    
+    return {
+        "success_rate": f"{min(base_rate, 98.5):.1f}%",
+        "involution_rate": 88 if province in ["北京", "上海", "山东", "河南"] else 75,
+        "prov_report": f"检测到您来自 {province}。2026 年该地区竞争极其激烈，继续投入的 ROI 正在下滑。",
+        "expert_advice": f"基于均分 {score} 的画像，日本国立大学（如：筑波大学）的降维打击优势明显。",
+        "roi_report": f"年度预算 {budget} 适配当前汇率环境，预测起薪涨幅 120%+"
+    }
+
+# --- 2. 页面基础配置 ---
+st.set_page_config(page_title="溜了么 | 留学就业规划", layout="wide", initial_sidebar_state="collapsed")
+
+# 侧边栏：放置你的微信二维码
+try:
+    st.sidebar.image("wechat_qr.png", caption="扫码添加溜老师，获取 1对1 深度解析")
+except:
+    st.sidebar.warning("请上传 wechat_qr.png 到 GitHub 仓库以显示二维码")
+
+# --- 3. HTML 界面逻辑 ---
+# 注意：CSS 中的所有 { } 必须替换为 {{ }} 否则 Python f-string 会报错
+html_content = f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="1894.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #000000; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #000000; -webkit-text-stroke: #000000; min-height: 14.0px}
-    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'PingFang SC'; color: #000000; -webkit-text-stroke: #000000}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 12.0px 'PingFang SC'; font-kerning: none}
-    span.s3 {font: 12.0px Helvetica; font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <style>
+        :root {{ --accent-color: #ff3b30; --apple-grey: #86868b; }}
+        p.p1 {{
+            margin: 0.0px 0.0px 0.0px 0.0px; 
+            font: 12.0px Helvetica; 
+            color: #000000; 
+            -webkit-text-stroke: #000000;
+        }}
+        body {{ background-color: #f5f5f7; font-family: sans-serif; }}
+        .hero {{ text-align: center; padding: 100px 20px; }}
+        .ai-btn {{ background: var(--accent-color); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: 600; cursor: pointer; }}
+        .search-box {{ margin-top: 30px; }}
+        input {{ padding: 12px; border-radius: 10px; border: 1px solid #ddd; width: 250px; }}
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">import streamlit as st</span></p>
-<p class="p1"><span class="s1">import streamlit.components.v1 as components</span></p>
-<p class="p1"><span class="s1">import json</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"># --- 1. Python </span><span class="s2">后端精算逻辑</span><span class="s1"> ---</span></p>
-<p class="p1"><span class="s1">def calculate_risk(province, score, budget, math, english):</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span># </span><span class="s2">模拟</span><span class="s1"> 2026 </span><span class="s2">数据库逻辑</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>high_pressure_provinces = ["</span><span class="s2">北京</span><span class="s1">", "</span><span class="s2">上海</span><span class="s1">", "</span><span class="s2">江苏</span><span class="s1">", "</span><span class="s2">浙江</span><span class="s1">", "</span><span class="s2">广东</span><span class="s1">", "</span><span class="s2">山东</span><span class="s1">", "</span><span class="s2">河南</span><span class="s1">"]</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p3"><span class="s3"><span class="Apple-converted-space">    </span># </span><span class="s1">基础成功率计算</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>base_rate = 70</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if province in high_pressure_provinces:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>invol_rate = 95</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>base_rate += (int(score) / 10)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>else:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>invol_rate = 75</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>base_rate += (int(score) / 8)</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span># </span><span class="s2">学力加成</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if math == "</span><span class="s2">很强</span><span class="s1">": base_rate += 10</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if english == "</span><span class="s2">精通</span><span class="s1">": base_rate += 10</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span># </span><span class="s2">预算修正</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if budget == "25</span><span class="s2">万以上</span><span class="s1">": base_rate += 5</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>success_rate = min(98.5, base_rate)</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"success_rate": f"{success_rate:.1f}%",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"involution_rate": invol_rate,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"prov_report": f"</span><span class="s2">检测到您来自</span><span class="s1">{province}</span><span class="s2">，该地区</span><span class="s1"> 2026 </span><span class="s2">年考公考研赛道拥挤度已达</span><span class="s1"> {invol_rate}%</span><span class="s2">。边际收益递减严重。</span><span class="s1">",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"expert_advice": f"</span><span class="s2">鉴于您的数学学力为</span><span class="s1">{math}</span><span class="s2">且英语</span><span class="s1">{english}</span><span class="s2">，在日元汇率波动的背景下，降维打击国立大学的</span><span class="s1"> ROI</span><span class="s2">（投资回报率）将比在国内卷提升</span><span class="s1"> 3.5 </span><span class="s2">倍。</span><span class="s1">",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>"roi_report": f"</span><span class="s2">基于</span><span class="s1">{budget}</span><span class="s2">预算，预计</span><span class="s1"> 4 </span><span class="s2">年跃迁总投入可控，起薪预测涨幅</span><span class="s1"> 120%+",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"># --- 2. Streamlit </span><span class="s2">页面配置</span><span class="s1"> ---</span></p>
-<p class="p1"><span class="s1">st.set_page_config(page_title="</span><span class="s2">溜了么</span><span class="s1"> | </span><span class="s2">精算级规划</span><span class="s1">", layout="wide")</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p3"><span class="s3"># </span><span class="s1">模拟一个简单的</span><span class="s3"> Session </span><span class="s1">状态来存储计算结果</span></p>
-<p class="p1"><span class="s1">if 'analysis_results' not in st.session_state:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>st.session_state.analysis_results = None</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"># --- 3. </span><span class="s2">嵌入</span><span class="s1"> HTML/JS </span><span class="s2">前端</span><span class="s1"> ---</span></p>
-<p class="p3"><span class="s3"># </span><span class="s1">这里我精简了</span><span class="s3"> HTML </span><span class="s1">部分以突出逻辑，请在实际使用时把你的完整</span><span class="s3"> CSS </span><span class="s1">粘贴进去</span></p>
-<p class="p1"><span class="s1">html_content = f"""</span></p>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* </span><span class="s2">这里粘贴你之前的完整</span><span class="s1"> CSS </span><span class="s2">代码</span><span class="s1"> */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>:root {{ --accent-color: #ff3b30; }}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* ... </span><span class="s2">省略重复的样式</span><span class="s1"> ... */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="app_interface"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// </span><span class="s2">当用户点击</span><span class="s1">“</span><span class="s2">开启早规划</span><span class="s1">”</span><span class="s2">时，将数据传给</span><span class="s1"> Python</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function runAnalysis() {{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const formData = {{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>province: document.getElementById('province').value,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>score: document.getElementById('userScore').value,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>budget: document.getElementById('budget').value,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>math: document.getElementById('math').value,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>english: document.getElementById('english').value</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}};</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// </span><span class="s2">将数据传回</span><span class="s1"> Streamlit (</span><span class="s2">使用</span><span class="s1"> window.parent </span><span class="s2">交互</span><span class="s1">)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>window.parent.postMessage({{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>type: 'streamlit:setComponentValue',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>value: formData</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}}, '*');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// </span><span class="s2">监听来自</span><span class="s1"> Python </span><span class="s2">的计算结果</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>window.addEventListener('message', function(event) {{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const results = event.data.analysis;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (results) {{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>renderReport(results); // </span><span class="s2">调用你原来的渲染报告逻辑</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
-<p class="p1"><span class="s1">"""</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p3"><span class="s3"># </span><span class="s1">渲染组件并捕获前端输入</span></p>
-<p class="p1"><span class="s1">captured_data = components.html(html_content, height=900, scrolling=True)</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"># --- 4. </span><span class="s2">实时响应与计算</span><span class="s1"> ---</span></p>
-<p class="p1"><span class="s1">if captured_data:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span># </span><span class="s2">当</span><span class="s1"> JS </span><span class="s2">传回</span><span class="s1"> formData </span><span class="s2">时，</span><span class="s1">Python </span><span class="s2">立即计算</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>results = calculate_risk(</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>captured_data['province'],<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>captured_data['score'],<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>captured_data['budget'],</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>captured_data['math'],</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>captured_data['english']</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>)</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p3"><span class="s3"><span class="Apple-converted-space">    </span># </span><span class="s1">将计算结果存入状态，触发</span><span class="s3"> JS </span><span class="s1">渲染（或直接显示在侧边栏测试）</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>st.sidebar.success(f"</span><span class="s2">计算完成：成功率</span><span class="s1"> {results['success_rate']}")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>st.sidebar.info("PDF </span><span class="s2">报告已在网页预览中生成</span><span class="s1">")</span></p>
-</body>
-</html>
+    <section class="hero">
+        <div class="hero-text">
+            <h1>从焦虑中，<br><span style="color:var(--accent-color);">优雅地溜出去。</span></h1>
+            <div class="search-box">
+                <input type="number" id="userScore" placeholder="输入均分（如 85）">
+                <select id="province" style="padding:12px; border-radius:10px;">
+                    <option value="北京">北京</option>
+                    <option value="上海">上海</option>
+                    <option value="山东">山东</option>
+                    <option value="广东">广东</option>
+                </select>
+                <button class="ai-btn" onclick="sendToPython()">开启早规划</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        async function sendToPython() {{
+            const formData = {{
+                province: document.getElementById('province').value,
+                score: document.getElementById('userScore').value,
+                budget: "15-25万",
+                math: "一般",
+                english: "良好"
+            }};
+... 
+...             // 将数据发送给 Python 后端
+...             window.parent.postMessage({{
+...                 type: 'streamlit:setComponentValue',
+...                 value: formData
+...             }}, '*');
+...         }}
+... 
+...         // 监听 Python 返回的结果（如果需要预览）
+...         window.addEventListener('message', function(e) {{
+...             if (e.data.type === 'streamlit:render') {{
+...                 const result = e.data.args.analysis_result;
+...                 if (result) {{
+...                     console.log("分析结果已到达前端", result);
+...                 }}
+...             }}
+...         }});
+...     </script>
+... </body>
+... </html>
+... """
+... 
+... # --- 4. 运行 Streamlit 应用 ---
+... user_input = components.html(html_content, height=600, scrolling=False)
+... 
+... # 如果前端传回了数据
+... if user_input:
+...     analysis_result = get_expert_analysis(user_input)
+...     
+...     # 在 Streamlit 原生界面显示结果（这样最稳妥，不会报错）
+...     st.divider()
+...     col1, col2 = st.columns(2)
+...     with col1:
+...         st.metric("跃迁成功率预测", analysis_result["success_rate"])
+...         st.error(f"🚩 赛道诊断: {analysis_result['prov_report']}")
+...     with col2:
+...         st.success(f"🎓 专家建议: {analysis_result['expert_advice']}")
+...         st.info(f"💰 ROI 财务回报: {analysis_result['roi_report']}")
+...     
